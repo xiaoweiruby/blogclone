@@ -291,6 +291,14 @@ class Comment < ApplicationRecord
   belongs_to :post
 end
 
+config/routes.rb
+Rails.application.routes.draw do
+  resources :posts do
+    resources :comments
+  end
+  root 'posts#index'
+end
+
 ```
 # 五、评论模板页面
 app/views/comments/-form.html.erb
@@ -330,4 +338,77 @@ app/views/comments/-comment.html.erb
                   method: :delete, class: "button is-danger", data: { confirm: 'Are you sure?' } %>
   </article>
 </div>
+```
+# 评论数据引入文章页面
+app/views/posts/index.html.erb
+```
+<% content_for :page_title,  "Index" %>
+
+<div class="section">
+	<div class="container">
+		<% @posts.each do |post| %>
+			<div class="card">
+		  <div class="card-content">
+		    <div class="media">
+		      <div class="media-content">
+		        <p class="title is-4"><%= link_to post.title, post  %></p>
+		      </div>
+		    </div>
+		    <div class="content">
+		     	<%= post.content %>
+		    </div>
+        <div class="comment-count">
+		    	<span class="tag is-rounded"><%= post.comments.count %> comments</span>
+		    </div>
+		  </div>
+		</div>
+		<% end %>
+	</div>
+</div>
+
+```
+app/views/posts/show.html.erb
+
+```
+<% content_for :page_title, @post.title %>
+
+<section class="section">
+	<div class="container">
+		<nav class="level">
+		  <!-- Left side -->
+		  <div class="level-left">
+		    <p class="level-item">
+		        <strong>Actions</strong>
+		    </p>
+		  </div>
+		  <!-- Right side -->
+		  <div class="level-right">
+		  	<p class="level-item">
+		    	<%= link_to "Edit", edit_post_path(@post), class:"button" %>
+		  	</p>
+		  	<p class="level-item">
+				<%= link_to "Delete", post_path(@post), method: :delete, data: { confirm: "Are you sure?" }, class:"button is-danger" %>
+				</p>
+		  </div>
+		</nav>
+		<hr/>
+
+		<div class="content">
+			<%= @post.content %>
+		</div>
+	</div>
+</section>
+
+<section class="section comments">
+	<div class="container">
+		<h2 class="subtitle is-5"><strong><%= @post.comments.count %></strong> Comments</h2>
+		<%= render @post.comments %>
+		<div class="comment-form">
+			<hr />
+			<h3 class="subtitle is-3">Leave a reply</h3>
+	 		<%= render 'comments/form' %>
+		</div>
+	</div>
+</section>
+
 ```
